@@ -1,0 +1,97 @@
+<view class="page">
+    <!--顶部导航栏navigationBar-->
+    <view class="navigation-container">
+        <!--空白来占位状态栏-->
+        <view style="height: {{statusBarHeight}}px"></view>
+        <!--自定义导航栏-->
+        <view class="navigation-bar" style="height: {{navigationBarHeight}}px;">
+            <view class="navigation-title" style="line-height:{{navigationBarHeight}}px;">吸污机
+                <view class="navigation-title-info">{{envVersion+" "+version}}</view>
+            </view>
+        </view>
+    </view>
+
+    <view class="page-content" style="min-height:{{pageContenHeight}}px">
+        <view class="top">
+            <view class="top-setting">
+                <view class="top-setting__image-wrapper-left">
+                    <image src="../../icon/clean.png" class="top-setting__image-left"></image>
+                </view>
+                <view class="top-setting__image-wrapper-center">
+                    <image src="../../icon/time.png" class="top-setting__image-center"></image>
+                    <text lines="1" class="top-setting__text-center">10</text>
+                </view>
+                <view class="top-setting__image-wrapper-right">
+                    <text lines="1" class="top-setting__text-right">8h</text>
+                </view>
+            </view>
+            <view class="top-controller">
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac">
+                        <image src="../../icon/letf-motor.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">左电机 </view>
+                    <view class="top-controller__value">100</view>
+
+                </view>
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac">
+                        <image src="../../icon/sensitivity.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">灵敏度 </view>
+                    <view class="top-controller__value">100</view>
+                </view>
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac">
+                        <image src="../../icon/model.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">{{/*机型*/}} </view>
+                    <view class="top-controller__value">双体</view>
+                </view>
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac">
+                        <image src="../../icon/right-motor.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">右电机</view>
+                    <view class="top-controller__value">100</view>
+                </view>
+
+            </view>
+        </view>
+        <view class="center">
+            <view class="center-controller">
+                <image src="../../icon/triangle.png" class="center-controller__up" bindtap="sendStr" data-str="3"></image>
+                <view class="center-controller__center-wrapper">
+                    <image src="../../icon/triangle.png" class="center-controller__left" bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" data-str="4"></image>
+                    <view class="center-controller__center">
+                        <view class="center-controller__center__bac" bindtap="sendStr" data-str="5">
+                            <text lines="1" decode="true" class="center-controller__center__text">{{"停 止"}}</text>
+                        </view>
+                    </view>
+                    <image src="../../icon/triangle.png" class="center-controller__right" bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" data-str="6"></image>
+                </view>
+
+                <image src="../../icon/triangle.png" class="center-controller__down" bindtap="sendStr" data-str="7"></image>
+
+            </view>
+        </view>
+        <view class="buttom">
+            <view class="buttom__controller-info">
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__text">左电机电流</view>
+                </view>
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__text">泵电机电流</view>
+                </view>
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__text">右电机电流</view>
+                </view>
+
+            </view>
+            <view lines="1" class="buttom-controller">选择设备</view>
+        </view>
+    </view>
+</view>

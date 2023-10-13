@@ -1,0 +1,24 @@
+{
+    "pages": [
+        "pages/index/index",
+        "pages/test/test"
+    ],
+    "window": {
+        "backgroundTextStyle": "light",
+        "navigationBarBackgroundColor": "#4277BD",
+        "navigationBarTitleText": "吸 污 控 制",
+        "navigationBarTextStyle": "white"
+    },
+    "permission": {
+        "scope.userLocation": {
+            "desc": "请允许使用位置信息辅助蓝牙搜索"
+        },
+        "scope.bluetooth": {
+            "desc": "请允许使用蓝牙进行设备连接"
+        }
+    },
+    "requiredPrivateInfos": [
+        "getLocation"
+    ],
+    "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,597 @@
+page {
+    height: 100%;
+    position: relative;
+}
+
+.head_title {
+    box-shadow: 0 -5rpx 5rpx 5rpx #ddd;
+    font-size: 38.4rpx;
+    letter-spacing: 20rpx;
+    padding: 20rpx;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title_text .info {
+    text-align: center;
+    padding: 0rpx 3rpx;
+    font-size: 30rpx;
+    color: #ddd;
+    position: absolute;
+    right: -180rpx;
+    bottom: -10rpx;
+    letter-spacing: normal;
+}
+
+.title_text {
+    position: relative;
+    display: inline-block;
+}
+
+.top_control {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 15rpx 20rpx 30rpx;
+}
+
+.top_control .top {
+    background-color: #f8f8f8;
+    border-radius: 10rpx;
+    box-shadow: 0 0 5rpx 2rpx rgba(0, 0, 0, .2);
+    margin: 20rpx;
+    padding: 15rpx 25rpx;
+}
+
+.top_control .top:active {
+    background-color: #dedede;
+    box-shadow: 0 0 10rpx 2rpx rgba(0, 0, 0, .2);
+    transform: scale(1.1);
+}
+
+.top_control .time {
+    max-width: 100px;
+    min-width: 30px;
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.center_controller {
+
+    margin-bottom: 350rpx;
+}
+
+.top_control .time image {
+    height: 20px;
+}
+
+.s {
+    border-bottom: 153.9rpx solid #f8f8f8;
+    border-left: 90rpx solid transparent;
+    border-right: 90rpx solid transparent;
+    box-sizing: border-box;
+    filter: drop-shadow(0 0 5rpx rgba(0, 0, 0, .2));
+    margin: 0 auto;
+    position: relative;
+    width: 0;
+    z-index: 0;
+}
+
+.s::before {
+    content: "";
+    position: absolute;
+    top: 77rpx;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.s:active {
+    border-bottom-color: 99rpx solid #dedede;
+    border-left: 99rpx solid transparent;
+    border-right: 99rpx solid transparent;
+    filter: drop-shadow(0 0 10rpx rgba(0, 0, 0, .2));
+    transform: scale(1.1);
+}
+
+.advance {
+    font-size: 32rpx;
+    font-weight: 600;
+    margin: 0 auto 51rpx;
+}
+
+.advance::before {
+    content: "前进" !important;
+}
+
+.direction {
+    align-items: center;
+    display: flex;
+    font-size: 32rpx;
+    justify-content: space-around;
+    margin: 77rpx 0;
+}
+
+.direction .box1,
+.direction .box2 {
+    flex: 1;
+}
+
+.direction .box2 {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.direction .box3 {
+    flex: 1;
+}
+
+.direction .left {
+    font-size: 32rpx;
+    font-weight: 600;
+    transform: rotate(-90deg);
+}
+
+.direction .left::before {
+    content: "左转" !important;
+    transform: rotate(90deg) translateY(35rpx);
+}
+
+.direction .left:active {
+    transform: scale(1.1) rotate(-90deg);
+}
+
+.direction .stop {
+    align-items: center;
+    background-color: #f8f8f8;
+    border-radius: 10rpx;
+    box-shadow: 0 0 5rpx 2rpx rgba(0, 0, 0, .2);
+    display: flex;
+    font-size: 32rpx;
+    font-weight: 600;
+    height: 180rpx;
+    justify-content: center;
+    width: 180rpx;
+}
+
+.direction .stop:active {
+    box-shadow: 0 0 10rpx 2rpx rgba(0, 0, 0, .2);
+    transform: scale(1.1);
+}
+
+.direction .right {
+    font-size: 32rpx;
+    font-weight: 600;
+    transform: rotate(90deg);
+}
+
+.direction .right::before {
+    content: "右转" !important;
+    transform: rotate(-90deg) translateY(-35rpx);
+}
+
+.direction .right:active {
+    transform: scale(1.1) rotate(90deg);
+}
+
+.back {
+    font-size: 32rpx;
+    font-weight: 600;
+    margin: 77rpx auto;
+    transform: rotate(180deg);
+}
+
+.back::before {
+    content: "后退" !important;
+    transform: rotate(180deg) translateX(50%);
+}
+
+.back:active {
+    transform: scale(1.1) rotate(180deg);
+}
+
+.bottom_container {
+    bottom: 10rpx;
+    min-height: 120rpx;
+    padding: 20rpx 0rpx;
+    position: fixed;
+    width: 100%;
+}
+
+.bottom_container .setting {
+    align-items: center;
+    padding: 20rpx 50rpx;
+}
+
+.bottom_container .setting,
+.bottom_container .setting .sendint {
+    display: flex;
+    justify-content: space-between;
+}
+
+.bottom_container .setting .sendint {
+    border: 1rpx solid #dedede;
+    border-radius: 10rpx;
+    flex-direction: column;
+    font-size: 29rpx;
+    padding: 7rpx 10rpx;
+}
+
+.bottom_container .setting .sendint .text {
+    line-height: 29rpx;
+    padding: 5rpx 0;
+    text-align: center;
+}
+
+.bottom_container .setting .sendint .text .mintext {
+    margin-top: 5rpx;
+}
+
+.bottom_container .setting .sendint image {
+    display: block;
+    margin: 0 auto;
+    max-height: 50rpx;
+    width: 50rpx;
+}
+
+.bottom_container .btn_control {
+    align-items: center;
+    display: flex;
+    height: 90rpx;
+    justify-content: space-between;
+}
+
+.bottom_container .btn_control .container_device_name {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    border-radius: 10rpx;
+    box-shadow: 0 0 5rpx 2rpx rgba(0, 0, 0, .2);
+    display: -webkit-box;
+    font-size: 32rpx/1.1;
+    font-weight: 600;
+    margin-left: 30rpx;
+    max-width: 150rpx;
+    opacity: .7;
+    overflow: hidden;
+    padding: 20rpx;
+    text-align: center;
+}
+
+.bottom_container .btn_control .notConnect {
+    color: #ec8b89;
+    white-space: nowrap;
+}
+
+.bottom_container .btn_control .isConnect {
+    color: #1aad19 !important;
+    white-space: nowrap;
+}
+
+.bottom_container .btn_control .close {
+    align-items: center;
+    border-radius: 10rpx;
+    box-shadow: 0 0 3rpx 2rpx rgba(0, 0, 0, .1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin-right: 30rpx;
+    padding: 5rpx;
+    white-space: nowrap;
+}
+
+.bottom_container .btn_control .close:active {
+    background-color: #dedede;
+}
+
+.bottom_container .btn_control .close image {
+    height: 60rpx;
+    width: 60rpx;
+}
+
+.bottom_container .btn_control .close text {
+    color: #dedede;
+    font-size: 20rpx;
+}
+
+.bottom_container .btn_control .hid {
+    height: 0;
+    overflow: hidden;
+    width: 0;
+}
+
+.search {
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5rpx;
+    box-shadow: 0 0 10rpx 5rpx #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: 1s;
+    width: 80%;
+    z-index: 1;
+}
+
+.search .showSearch {
+    animation: hideSearch;
+    animation-duration: .7s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+}
+
+.search .hideSearch {
+    animation: showSearch;
+    animation-duration: .7s;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+}
+
+.search scroll-view {
+    height: 800rpx;
+    padding-bottom: 10rpx;
+    width: 100%;
+}
+
+.search scroll-view .bluetooth_items {
+    align-items: center;
+    border-bottom: 2rpx dashed #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 10rpx 20rpx;
+}
+
+.search scroll-view .bluetooth_items:active {
+    background-color: #ddd;
+}
+
+.search scroll-view .bluetooth_items .device_contain_top {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 5rpx;
+    width: 100%;
+}
+
+.search scroll-view .bluetooth_items .device_contain_top .device_name {
+    font-size: 30rpx;
+}
+
+.search scroll-view .bluetooth_items .device_contain_top .device_state {
+    color: #1aad19;
+    font-size: 25rpx;
+}
+
+.search scroll-view .bluetooth_items .device_contain_top .device_stateRed {
+    color: #ec8b89;
+    font-size: 25rpx;
+}
+
+.search scroll-view .bluetooth_items .device_contain_bottom {
+    align-items: center;
+    color: #a0a0a0;
+    display: flex;
+    font-size: 24rpx;
+    justify-content: space-between;
+    padding: 5rpx;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.search scroll-view .bluetooth_items .device_contain_bottom .device_id {
+    margin-left: 20rpx;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.search scroll-view .bluetooth_items .device_contain_bottom .rrsi {
+    margin: 0 auto;
+    text-align: center;
+    flex: 1;
+}
+
+.search button {
+    font-size: 40rpx;
+    height: 90rpx;
+    justify-content: space-around;
+    padding: 0rpx 10rpx;
+    width: 100% !important;
+}
+
+.search .title,
+.search button {
+    align-items: center;
+    display: flex;
+}
+
+.search .title {
+    border: 2rpx solid #ddd;
+    border-top-color: #4277bd;
+    font-size: 42rpx;
+    height: 60rpx;
+    justify-content: space-between;
+    padding: 10rpx 50rpx;
+    width: 100%;
+}
+
+.search .title image {
+    height: 50rpx !important;
+    margin-right: 10rpx;
+}
+
+.search .title .refresh {
+    animation: refresh 2s linear;
+}
+
+@-webkit-keyframes refresh {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(2turn);
+    }
+}
+
+@keyframes refresh {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(2turn);
+    }
+}
+
+.search .hide_searchList {
+    height: 70rpx;
+    width: 70rpx;
+    margin: 0 auto;
+    padding: 20rpx;
+}
+
+.search .hide_searchList_warp {
+    width: 100%;
+    height: 90rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inputInt {
+    background-color: #fff;
+    border: 1rpx solid #dedede;
+    border-radius: 20rpx;
+    box-shadow: 0 0 25rpx 10rpx #ddd;
+    height: 500rpx;
+    left: 50%;
+    padding: 7rpx;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 550rpx;
+}
+
+.inputInt .in {
+    border-bottom: 1px solid #dedede;
+    font-size: 48rpx;
+    line-height: 2em;
+    text-align: center;
+    width: auto;
+}
+
+.inputInt .inputarea {
+    display: flex;
+    height: 20%;
+    margin: 0 50rpx;
+    position: absolute;
+    top: 40%;
+    width: 450rpx;
+}
+
+.inputInt .inputarea input {
+    border-bottom: 1rpx solid #ddd;
+    flex: 1;
+    padding-bottom: 10rpx;
+    padding-left: 10rpx;
+}
+
+.inputInt .click {
+    align-items: center;
+    border-top: 1px solid #dedede;
+    bottom: 0;
+    box-sizing: initial;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 10rpx;
+    position: absolute;
+}
+
+.inputInt .click .cancel {
+    border-bottom-left-radius: 15rpx;
+    border-right: 2rpx solid #dedede;
+    border-top-left-radius: 15rpx;
+    color: #dedede;
+    font-size: 48rpx;
+    line-height: 2em;
+    padding: 10rpx;
+    text-align: center;
+    width: 253rpx;
+}
+
+.inputInt .click .cancel:active {
+    background-color: #e6e6e6;
+}
+
+.inputInt .click .confirm {
+    border-bottom-right-radius: 15rpx;
+    border-top-right-radius: 15rpx;
+    color: #4277bd;
+    font-size: 48rpx;
+    line-height: 2em;
+    padding: 10rpx;
+    text-align: center;
+    width: 255rpx;
+}
+
+.inputInt .click .confirm:active {
+    background-color: #e6e6e6;
+}
+
+@-webkit-keyframes hideSearch {
+    0% {
+        max-height: 800rpx;
+        opacity: 1;
+    }
+
+    100% {
+        max-height: 0;
+        opacity: .3;
+    }
+}
+
+@keyframes hideSearch {
+    0% {
+        max-height: 800rpx;
+        opacity: 1;
+    }
+
+    100% {
+        max-height: 0;
+        opacity: .3;
+    }
+}
+
+@-webkit-keyframes showSearch {
+    0% {
+        max-height: 0;
+        opacity: .3;
+    }
+
+    100% {
+        max-height: 800rpx;
+        opacity: 1;
+    }
+}
+
+@keyframes showSearch {
+    0% {
+        max-height: 0;
+        opacity: .3;
+    }
+
+    100% {
+        max-height: 800rpx;
+        opacity: 1;
+    }
+}

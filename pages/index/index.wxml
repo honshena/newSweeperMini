@@ -1,0 +1,100 @@
+<view class="head_title" hidden="{{titleHidden}}">
+  <view class="title_text">
+    吸污机
+    <view class="info">{{envVersion+" "+version}}</view>
+  </view>
+
+</view>
+<view class="top_control">
+  <view bindtap="sendStr" class="clear top" data-str="1">{{model===model_select[2]?'爬墙':'清理'}}</view>
+  <view bindtap="showInput" class="top time" data-i="4">
+    <image mode="heightFix" src="../../icon/time.png"></image>
+    <view class="mintext">{{input[4]?input[4]:'1~1000'}}</view>
+  </view>
+  <view bindtap="sendStr" class="top" data-str="2">{{input[6]?input[6]:'3'}}h</view>
+</view>
+<view class="center_controller" style="margin-top: {{marginTop+'rpx'}};margin-bottom: {{marginBtm+'px'}};">
+  <view bindtap="sendStr" class="advance s" data-str="3" id="advance"></view>
+  <view class="direction">
+    <view class="box1">
+      <view bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" class="left s" data-str="4"></view>
+    </view>
+    <view class="box2">
+      <view bindtap="sendStr" class="stop" data-str="5" id="stop">停 止</view>
+    </view>
+    <view class="box3">
+      <view bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" class="right s" data-str="6"></view>
+    </view>
+  </view>
+  <view bindtap="sendStr" class="back s" data-str="7"></view>
+</view>
+<view class="bottom_container">
+  <view style="display: flex;justify-content: space-between;width: 100%;margin: 0;"> <button style="width: 60px;margin: 0;margin-left: 20px; height: 30px;display: flex;align-items: center;justify-content: center;" bindtap="otaUpdate">ota</button></view>
+
+  <view class="setting">
+
+    <view bindtap="showInput" class="sendint" data-i="1">
+      <image mode="widthFix" src="../../icon/set.png"></image>
+      <view class="text"> {{'左电机'}} <view class="mintext">{{input[1]?input[1]:'0~100'}}</view>
+      </view>
+    </view>
+    <view bindtap="showInput" class="sendint" data-i="2">
+      <image mode="widthFix" src="../../icon/op.png"></image>
+      <view class="text"> {{model==model_select[2]?'爬墙时间':'灵敏度'}} <view class="mintext">{{input[2]?input[2]:'0~100'}}</view>
+      </view>
+    </view>
+    <view class="sendint" data-i="5">
+      <picker bindchange="changeModel" data-i="5" mode="selector" range="{{model_select}}">
+        <image mode="widthFix" src="../../icon/phone.png"></image>
+        <view class="text">
+          <view class="mintext">{{model}}</view>
+        </view>
+      </picker>
+    </view>
+    <view bindtap="showInput" class="sendint" data-i="3">
+      <image mode="widthFix" src="../../icon/set.png"></image>
+      <view class="text"> {{'右电机'}} <view class="mintext">{{input[3]?input[3]:'0~100'}}</view>
+      </view>
+    </view>
+  </view>
+  <view class="btn_control">
+    <view bindtap="chooseDevice" class="container_device_name {{isConnect?'isConnect':'notConnect'}}"> {{isConnect? lastestConnecteddevice.deviceName?lastestConnecteddevice.deviceName:'未知设备':'选择设备'}} </view>
+    <view bindtap="releaseBluetooth" class="{{isConnect?'close':'hid'}}">
+      <image class="" src="{{isConnect?'../../icon/bluetoothconnect.png':'../../icon/bluetoothdisconnect.png'}}"></image>
+      <text>{{isConnect?'断开连接':''}}</text>
+    </view>
+  </view>
+</view>
+
+<view class="search" hidden="{{isSearchHidden?isDelay:isSearchHidden}}">
+  <view class="title">
+    <text></text> 附 近 的 蓝 牙 <image bindtap="refresh" class="{{refresh?'refresh':''}}" mode="heightFix" src="../../icon/refresh.png"></image>
+  </view>
+  <scroll-view scrollY class="{{isSearchHidden?'showSearch':'hideSearch'}}">
+    <view bindtap="connect" class="bluetooth_items" data-deviceId="{{item.deviceId}}" data-deviceName="{{item.deviceName}}" data-localName="{{item.localName}} " data-name="{{item.name}}" wx:for="{{devices}}" wx:key="deviceId">
+      <view class="device_contain_top">
+        <view class="device_name">{{item.deviceName}} {{envVersion!='正式版' && item.deviceName=='吸污机'? '('+ item.name +')':''}}</view>
+        <view class="device_stateRed" wx:if="{{!isConnect}}"> {{('吸污机'==item.deviceName)?'未连接':''}} </view>
+        <view class="device_state" wx:else> {{isConnect?lastestConnecteddevice.deviceId==item.deviceId?'已连接':'':''}} </view>
+      </view>
+      <view class="device_contain_bottom">
+        <view class="device_id">{{'deviceId: '+item.deviceId}}</view>
+        <view class="rrsi">RRSI: {{item.RSSI}}</view>
+      </view>
+    </view>
+  </scroll-view>
+  <view bindtap="hideSearchlist" class="hide_searchList_warp">
+    <image src="../../icon/closeSearchList.png" class="hide_searchList"></image>
+  </view>
+
+</view>
+<view class="inputInt" hidden="{{!isInput}}">
+  <view class="in">提示</view>
+  <view class="inputarea">
+    <input bindchange="chageInput" placeholder="{{inputPlaceholder}}" type="text" value="{{input[inputInd]}}"></input>
+  </view>
+  <view class="click">
+    <view bindtap="hidInput" class="cancel">取消</view>
+    <view bindtap="handleInput" class="confirm">确定</view>
+  </view>
+</view>
