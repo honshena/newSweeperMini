@@ -506,7 +506,7 @@ class BluetoothManager {
 
   //停止监听蓝牙状态改变
   stopBLEConnectionStateChange() {
-
+    
   }
 
   //删除服务号和特征值用于重新赋值
@@ -807,6 +807,7 @@ class BluetoothManager {
     if (this.sendIntervalId != null)
       this.stopIntervalSendData()
     const self = this
+    //阻止异步中的多次定时器触发
     if (this.sendIntervalId == null) {
       this.sendIntervalId = setInterval(() => {
         //console.log("定时发送数据成功启动", this.sendIntervalId);

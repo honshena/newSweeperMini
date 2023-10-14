@@ -15,45 +15,48 @@
         <view class="top">
             <view class="top-setting">
                 <view class="top-setting__image-wrapper-left">
-                    <image src="../../icon/clean.png" class="top-setting__image-left"></image>
+                    <image src="../../icon/clean.png" bindtap="sendStr" class="top-setting__image-left" data-str="1"></image>
                 </view>
-                <view class="top-setting__image-wrapper-center">
+                <view class="top-setting__image-wrapper-center"  bindtap="showInput" data-i="4">
                     <image src="../../icon/time.png" class="top-setting__image-center"></image>
-                    <text lines="1" class="top-setting__text-center">10</text>
+                    <text lines="1" class="top-setting__text-center">{{input[4]?input[4]:'1/1000'}}</text>
                 </view>
                 <view class="top-setting__image-wrapper-right">
-                    <text lines="1" class="top-setting__text-right">8h</text>
+                    <text lines="1" class="top-setting__text-right" bindtap="sendStr" data-str="2">{{input[6]?input[6]:'3'}}h</text>
                 </view>
             </view>
             <view class="top-controller">
                 <view class="top-controller__item">
-                    <view class="top-controller__item__bac">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="1">
                         <image src="../../icon/letf-motor.png" class="top-controller__item__icon"></image>
                     </view>
                     <view class="top-controller__meaning">左电机 </view>
-                    <view class="top-controller__value">100</view>
+                    <view class="top-controller__value">{{input[1]?input[1]:'0/100'}}</view>
 
                 </view>
                 <view class="top-controller__item">
-                    <view class="top-controller__item__bac">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="2">
                         <image src="../../icon/sensitivity.png" class="top-controller__item__icon"></image>
                     </view>
-                    <view class="top-controller__meaning">灵敏度 </view>
-                    <view class="top-controller__value">100</view>
+                    <view class="top-controller__meaning"> {{model==model_select[2]?'爬墙时间':'灵敏度'}} </view>
+                    <view class="top-controller__value">{{input[2]?input[2]:'0/100'}}</view>
                 </view>
                 <view class="top-controller__item">
-                    <view class="top-controller__item__bac">
-                        <image src="../../icon/model.png" class="top-controller__item__icon"></image>
-                    </view>
+                    <picker bindchange="changeModel" data-i="5" mode="selector" range="{{model_select}}">
+                        <view class="top-controller__item__bac">
+                            <image src="../../icon/model.png" class="top-controller__item__icon"></image>
+                        </view>
+                    </picker>
+
                     <view class="top-controller__meaning">{{/*机型*/}} </view>
-                    <view class="top-controller__value">双体</view>
+                    <view class="top-controller__value">{{model}}</view>
                 </view>
                 <view class="top-controller__item">
-                    <view class="top-controller__item__bac">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="3">
                         <image src="../../icon/right-motor.png" class="top-controller__item__icon"></image>
                     </view>
                     <view class="top-controller__meaning">右电机</view>
-                    <view class="top-controller__value">100</view>
+                    <view class="top-controller__value">{{input[3]?input[3]:'0/100'}}</view>
                 </view>
 
             </view>
@@ -78,20 +81,23 @@
         <view class="buttom">
             <view class="buttom__controller-info">
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__value">{{input[7]?input[7]:0}}</view>
                     <view class="buttom__controller-info__text">左电机电流</view>
                 </view>
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__value">{{input[8]?input[8]:0}}</view>
                     <view class="buttom__controller-info__text">泵电机电流</view>
                 </view>
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">1234</view>
+                    <view class="buttom__controller-info__value">{{input[9]?input[9]:0}}</view>
                     <view class="buttom__controller-info__text">右电机电流</view>
                 </view>
 
             </view>
-            <view lines="1" class="buttom-controller">选择设备</view>
+            <view class="{{isConnect? 'buttom-controller-not-connect' : 'buttom-controller-connected' }}" bindtap="deviceControl"> {{isConnect?'断开连接':'选择设备'}} </view>
         </view>
     </view>
 </view>
+<modal type="{{modalProps.type}}" hideCancel="{{modalProps.hideCancel}}" bind:handleSure="{{modalProps.handleSure}}" placeholder="{{modalProps.placeholder}}" isHidden="{{modalProps.isHidden}}" bind:handleCancel="{{modalProps.handleCancel}}" mask="{{true}}" okText="{{modalProps.okText}}"></modal>
+
+<view></view>

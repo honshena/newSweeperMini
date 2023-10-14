@@ -1,5 +1,7 @@
 {
-    "usingComponents": {},
+    "usingComponents": {
+        "modal":"../../components/modal/modal"
+    },
     "navigationBarTextStyle": "white",
     "navigationStyle": "custom",
     "enablePullDownRefresh": true

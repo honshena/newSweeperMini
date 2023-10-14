@@ -138,7 +138,7 @@ const
   //统一返回数据对象
   resAndInfo = (res, info, msg, ...args) => {
     return {
-      res, //结果变量
+      res, //结果变量布尔值
       info, //结果对象
       msg, //结果描述
       ...args

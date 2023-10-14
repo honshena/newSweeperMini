@@ -1,0 +1,16 @@
+<!--components/modal/modal.wxml-->
+<view class="modal" hidden="{{isHidden}}">
+    <view hidden="{{!mask}}" class="modal-mask" style="height:{{pageHeight}}px;width:{{pageWidth}}px;"></view>
+    <view class="modal-wrapper">
+        <view class="modal-info">提示</view>
+        <view class="modal-area">
+            <input wx:if="{{type==='input'||type==='text'}}" bindblur='inputBlur' bindchange="chageInput" placeholder="{{isInput?'':placeholder}}" type="text" class="modal-input" maxlength="4" disabled="{{type==='text'}}" bindfocus="inputFocus"></input>
+            <slot></slot>
+        </view>
+        <view class="{{hideCancel?'modal-btn modal-btn-single':'modal-btn'}}">
+            <view hidden="{{hideCancel}}" bindtap="handleCancel" class="modal-btn-cancel">取消</view>
+            <view bindtap="handleSure" class="modal-btn-sure">{{okText?okText:'确定'}}</view>
+        </view>
+    </view>
+
+</view>

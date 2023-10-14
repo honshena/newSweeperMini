@@ -70,7 +70,10 @@ Page({
          * 3: 右电机
          * 4: 安全时间
          * 5: 机型
-         * 6: 定时
+         * 6: 定时,
+         * 7: 左电机电流
+         * 8: 泵电机电流
+         * 9: 右电机电流
          */
         input: [],
         marginTop: 0,
@@ -85,22 +88,36 @@ Page({
         //小程序当前版本信息
         appInfo: {},
         envVersion: '',
-        version: ''
+        version: '',
+        //弹窗属性
+        modalProps: {
+            type: 'input',
+            isHidden: true,
+            hideCancel: false,
+            mask: true,
+            placeholder: '',
+        }
+    },
+    defauleModalProps: {
+        type: 'input',
+        isHidden: true,
+        hideCancel: false,
+        mask: true,
+        placeholder: '',
     },
     //持续发送字符串定时器id
     keepSend: "",
 
     async onLoad(onLoadInfo) {
-        logInfo("[index.onLoad]", onLoadInfo)
-
+        logInfo("[newIndex.onLoad]", onLoadInfo)
         //获取手机信息
         const sysInfo = wx.getSystemInfoSync()
         logInfo(`手机型号: [${sysInfo.brand} ${sysInfo.model}], 手机系统: [${sysInfo.system}]`, sysInfo)
+
+        //初始化导航栏高度,要在onload执行,onshow执行会有页面异常跳动
+        this.initNavBar()
+
         buletoothManager = new BluetoothManager(sysInfo.system)
-        //初始化
-        this.devicesMap = new Map()
-        //获取小程序版本信息
-        this.getMiniProgramInfo()
 
         const
             lastestConnecteddevice = getLatesDeviceStorage(),
@@ -115,6 +132,17 @@ Page({
 
         })
 
+
+    },
+
+    async onShow() {
+        //解包测试: 升级和通讯故障测试
+        this.resolvePackage([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
+        //初始化附件设备列表
+        this.devicesMap = new Map()
+        //获取小程序版本信息
+        this.getMiniProgramInfo()
         //判断是否开启了蓝牙和位置信息
         //const prepared =await 
         this.isBuletoothAndLocationPrepared()
@@ -122,12 +150,7 @@ Page({
         //如果开启了则重连上次设备,重连上次设备是不是不需要位置信息???
         // prepared && lastestConnecteddevice && lastestConnecteddevice.deviceId && this.connectBLEDevice(lastestConnecteddevice, true) //重连上次设备参数二为true
     },
-
-    async onShow() {
-        //初始化导航栏高度
-        this.initNavBar()
-
-    },
+    //设置界面高度和内容区域高度
     initNavBar() {
         const {
             statusBarHeight,
@@ -151,7 +174,7 @@ Page({
         this.setData({
             navigationBarHeight,
             statusBarHeight,
-            pageContenHeight: windowHeight - navigationBarHeight-statusBarHeight
+            pageContenHeight: windowHeight - navigationBarHeight - statusBarHeight
         })
     },
 
@@ -254,9 +277,12 @@ Page({
     resolvePackage(arr = []) {
         //解包的文档看document
         let ota = OTAVersion.get(LASTEST_VSERSION)
-        console.log(ota.version, arr[1], ota.version > arr[1])
         if (ota.version > arr[1] && !this.alreadyUpdate) {
-            showToast('有新的版本是否升级?')
+            this.showWarn('有新的版本是否升级', {
+                hideCancel: false,
+                handleSure: 'otaUpdate',
+                handleCancel: 'hideModal'
+            })
             ota.version = arr[1]
             this.alreadyUpdate = true
         }
@@ -267,15 +293,11 @@ Page({
         for (let i = 0; i < 8; i++) {
             //todo: 正式上线需要全部都显示
             if ((warnH & 1) && !this.alreadyWarnH[i]) {
-                setTimeout(() => {
-                    showToast(warningH[i])
-                }, 500 * i)
+                this.showWarn(warningH[i])
                 this.alreadyWarnH[i] = true
             }
             if ((warnL & 1) && !this.alreadyWarnL[i]) {
-                setTimeout(() => {
-                    showToast(warningL[i])
-                }, 500 * i)
+                this.showWarn(warningL[i])
                 this.alreadyWarnL[i] = true
             }
             warnL = warnL >> 1
@@ -291,10 +313,30 @@ Page({
          * 4: 安全时间
          * 5: 机型
          * 6: 定时
+         * 7: 左电机电流
+         * 8: 泵电机电流
+         * 9: 右电机电流
          */
-        let input = [0, arr[3], arr[8], arr[4], arr[9], arr[2], this.data.input[6]]
+        let input = [0, arr[3], arr[8], arr[4], arr[9], arr[2], this.data.input[6], arr[5], arr[7], arr[6]]
         this.setData({
             input: [...input]
+        })
+    },
+    //显示提示,是否需要上传日志
+    showWarn(text, op) {
+        if (!text) return;
+        logWarn('[showWarn]故障: ', text)
+        const prop = {
+            isHidden: false,
+            type: 'text',
+            placeholder: text,
+            hideCancel: true,
+            handleSure: 'hideModal', //调用this.hideModal()
+            ...op,
+        }
+        this.modalStack.push(prop)
+        this.setData({
+            modalProps: prop
         })
     },
     //读取蓝牙数据
@@ -323,35 +365,52 @@ Page({
     updateConnectIntarl: null, //建立连接定时器
     otaUpdate() {
         logInfo('click [otaUpate]: ', this.updateErrorCount)
-
+        this.hideModal()
         if (!this.updateConnectIntarl) {
             this.updateConnectIntarl = setInterval(() => {
                 this.updateErrorCount += 1;
                 if (this.updateErrorCount >= 3) {
                     clearInterval(this.updateConnectIntarl)
                     this.updateConnectIntarl = null
-                    showToast('ota 更新出错')
+                    this.showWarn('ota 更新出错')
                 }
                 buletoothManager.writeBLECharacteristicValue("k 01")
             }, awaitInterval)
         }
         this.updateErrorCount = 0;
     },
-    otaUpdateSend() {
-        setTimeout(() => {
+
+    async otaUpdateSend() {
+        setTimeout(async () => {
             const ota = OTAVersion.get(LASTEST_VSERSION)
-            const length = ota.file.length / 20
+            //向上取整
+            const length = Math.ceil(ota.file.length / 20)
             let arr = []
+            const timers = []
             for (let i = 0; i < length; i++) {
-                setTimeout(() => {
+                let timer = setTimeout(async () => {
                     arr = ota.file.slice(i * 20, i * 20 + 20)
-                    console.log('send: ', arr)
-                    buletoothManager.writeBLECharacteristicValue(arr)
+                    //仅在50%和100%时上传日志
+                    this.setData({
+                        modalProps: {
+                            placeholder: `OTA升级进度: ${Math.floor((i+1)/length*100)}%`,
+                            hideCancel: true,
+                            type: 'text',
+                            handleSure: i == length - 1 ? 'hideModal' : '',
+                            okText: i == length - 1 ? '升级成功' : '请等待',
+
+                        }
+                    })
+                    const writeRes = await buletoothManager.writeBLECharacteristicValue(arr)
+                    if (!writeRes.res) {
+                        this.hideModal()
+                        this.showWarn('升级失败,请稍后重试')
+                        timers.forEach(v => clearTimeout(v))
+                    }
                 }, i * acceptInterval)
-
+                timers.push(timer)
             }
-
-
+            //等待主板准备2s
         }, 2000)
     },
     //连接蓝牙设备
@@ -580,7 +639,9 @@ Page({
     //用户点击按钮,并发送数据
     sendStr: function (e) {
         //振动
-        wx.vibrateShort({type:'light'})
+        wx.vibrateShort({
+            type: 'light'
+        })
         let data = e.currentTarget.dataset.str,
             {
                 input
@@ -625,7 +686,9 @@ Page({
     //用户点击左转和右转
     keepSendStr: async function (e) {
         //振动
-        wx.vibrateShort({type:'light'})
+        wx.vibrateShort({
+            type: 'light'
+        })
         if (!this.data.isConnect) {
             showToast("请先连接蓝牙")
             return
@@ -678,10 +741,11 @@ Page({
 
         //console.log([prefix, data]);
         buletoothManager.writeBLECharacteristicValue([prefix, data])
-        this.hidInput()
+
         setTimeout(() => {
             if (input[inputInd] === this.data.input[inputInd]) {
                 showToast('更改设置成功')
+                this.hideModal()
             } else {
                 showToast('更改设置失败')
             }
@@ -689,7 +753,7 @@ Page({
     },
 
     //用户点击选择机型
-    changeModel: function (e) {
+    changeModel(e) {
         var data = parseInt(e.detail.value) + 1;
         logInfo(`用户[点击]选择机型, 更改机型为: [${this.data.model_select[data-1]}], index.changeModel`);
         let input = this.data.input;
@@ -705,18 +769,16 @@ Page({
     },
 
     //修改配置
-    chageInput: function (e) {
+    chageInput: function (value) {
         const {
             model,
             model_select
         } = this.data
         const inputInd = parseInt(this.data.inputInd),
-            value = parseInt(e.detail.value),
             input = [...this.data.input];
         let errFlag = false;
         input[inputInd] = value
-
-        //判断是否错误修改
+        //判断是否错误修改,输入汉字等
         if (!input[inputInd] && input[inputInd] != 0) {
             showToast("输入数据错误")
             return
@@ -749,6 +811,10 @@ Page({
             input: [...input]
         });
     },
+    changeAndHandleInput(e) {
+        this.chageInput(parseInt(e.detail))
+        this.handleInput()
+    },
     //修改安全时间
     changeTime(e) {
         let {
@@ -774,8 +840,13 @@ Page({
         this.handleInput()
 
     },
+    //弹窗栈 数组
+    modalStack: [],
+    getModalTop() {
+        return this.modalStack[this.modalStack.length - 1]
+    },
     //显示输入框
-    showInput: function (e) {
+    showInput(e) {
         const index = e.currentTarget.dataset.i;
         let {
             inputPlaceholder,
@@ -785,25 +856,25 @@ Page({
         //上报用户点击输入框按钮的行为
         switch (index) {
             case '1':
-                inputPlaceholder = '输入左电机转速: 0~100'
+                inputPlaceholder = '输入左电机转速: 0-100'
                 logInfo('用户[点击]设置左电机转速');
                 break;
             case '2':
                 if (model === model_select[2]) {
-                    inputPlaceholder = '输入爬墙时间: 1~100'
+                    inputPlaceholder = '输入爬墙时间: 1-100'
                     logInfo('用户[点击]设置爬墙时间');
                 } else {
-                    inputPlaceholder = '输入灵敏度: 1~100'
+                    inputPlaceholder = '输入灵敏度: 1-100'
                     logInfo('用户[点击]设置灵敏度');
                 }
                 break;
             case '3':
-                inputPlaceholder = '输入右电机转速: 0~100'
+                inputPlaceholder = '输入右电机转速: 0-100'
                 logInfo('用户[点击]设置右电机');
                 break;
             case '4':
 
-                inputPlaceholder = '请输入安全时间: 1~1000秒'
+                inputPlaceholder = '请输入安全时间: 1-1000秒'
                 logInfo('用户[点击]设置安全时间');
 
 
@@ -819,16 +890,54 @@ Page({
             isInput: true,
             inputInd: index,
             inputPlaceholder,
+            modalProps: {
+                isHidden: false,
+                type: 'input',
+                placeholder: inputPlaceholder,
+                handleCancel: 'hideModal', //调用this.hideModal()
+                handleSure: 'changeAndHandleInput', //调用this.changeAndHandleInput()
+            }
         });
     },
 
-    //隐藏输入框
-    hidInput: function () {
-        this.setData({
-            isInput: false
-        });
-    },
+    //隐藏当前modal,并显示下一个modal
+    hideModal: function () {
+        let prop = this.modalStack?.pop() || this.defauleModalProps || {}
 
+        if (this.modalStack?.length) {
+            prop = this.getModalTop()
+            this.setData({
+                modalProps: {
+                    ...prop,
+                    isHidden: false
+                },
+            })
+        } else {
+            this.setData({
+                modalProps: {
+                    ...prop,
+                    isHidden: true
+                }
+            });
+        }
+    },
+    //连接蓝牙和断开蓝牙
+    deviceControl() {
+        const {
+            isConnect
+        } = this.data
+        if (isConnect) {
+            //弹窗确认是否要断开连接
+            this.showWarn('是否要断开连接?', {
+                hideCancel: false,
+                handleCancel: 'hideModal',
+                handleSure: 'releaseBluetooth'
+            })
+        } else {
+            this.chooseDevice()
+        }
+
+    },
     //断开蓝牙连接
     releaseBluetooth: function () {
         logInfo('用户[点击]释放蓝牙资源, index.releaseBluetooth')
@@ -836,6 +945,7 @@ Page({
         this.setData({
             isConnect: false
         });
+        this.hideModal()
     },
 
     //下拉重连设备
