@@ -1,0 +1,141 @@
+<view class="page">
+    <!--顶部导航栏navigationBar-->
+    <view class="navigation-container">
+        <!--空白来占位状态栏-->
+        <view style="height: {{statusBarHeight}}px"></view>
+        <!--自定义导航栏-->
+        <view class="navigation-bar" style="height: {{navigationBarHeight}}px;">
+            <view class="navigation-title" style="line-height:{{navigationBarHeight}}px;">吸污机
+                <view class="navigation-title-info">{{envVersion+" "+version}}</view>
+            </view>
+        </view>
+    </view>
+
+    <view class="page-content" style="min-height:{{pageContenHeight}}px">
+        <view class="top">
+            <view class="top-setting">
+                <view class="top-setting__image-wrapper-left">
+                    <image src="../../icon/clean.png" bindtap="sendStr" class="top-setting__image-left" data-str="1"></image>
+                </view>
+                <view class="top-setting__image-wrapper-center" bindtap="showInput" data-i="4">
+                    <image src="../../icon/time.png" class="top-setting__image-center"></image>
+                    <text lines="1" class="top-setting__text-center">{{input[4]?input[4]:'1/1000'}}</text>
+                </view>
+                <view class="top-setting__image-wrapper-right">
+                    <text lines="1" class="top-setting__text-right" bindtap="sendStr" data-str="2">{{input[6]?input[6]:'3'}}h</text>
+                </view>
+            </view>
+            <view class="top-controller">
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="1">
+                        <image src="../../icon/letf-motor.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">左电机 </view>
+                    <view class="top-controller__value">{{input[1]?input[1]:'0/100'}}</view>
+
+                </view>
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="2">
+                        <image src="../../icon/sensitivity.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning"> {{model==model_select[2]?'爬墙时间':'灵敏度'}} </view>
+                    <view class="top-controller__value">{{input[2]?input[2]:'0/100'}}</view>
+                </view>
+                <view class="top-controller__item">
+                    <picker bindchange="changeModel" data-i="5" mode="selector" range="{{model_select}}">
+                        <view class="top-controller__item__bac">
+                            <image src="../../icon/model.png" class="top-controller__item__icon"></image>
+                        </view>
+                    </picker>
+
+                    <view class="top-controller__meaning">{{/*机型*/}} </view>
+                    <view class="top-controller__value">{{model}}</view>
+                </view>
+                <view class="top-controller__item">
+                    <view class="top-controller__item__bac" bindtap="showInput" data-i="3">
+                        <image src="../../icon/right-motor.png" class="top-controller__item__icon"></image>
+                    </view>
+                    <view class="top-controller__meaning">右电机</view>
+                    <view class="top-controller__value">{{input[3]?input[3]:'0/100'}}</view>
+                </view>
+
+            </view>
+        </view>
+        <view class="center">
+            <view class="center-controller">
+                <image src="../../icon/triangle.png" class="center-controller__up" bindtap="sendStr" data-str="3"></image>
+                <view class="center-controller__center-wrapper">
+                    <image src="../../icon/triangle.png" class="center-controller__left" bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" data-str="4"></image>
+                    <view class="center-controller__center">
+                        <view class="center-controller__center__bac" bindtap="sendStr" data-str="5">
+                            <text lines="1" decode="true" class="center-controller__center__text">{{"停 止"}}</text>
+                        </view>
+                    </view>
+                    <image src="../../icon/triangle.png" class="center-controller__right" bindtouchend="cancleSendStr" bindtouchstart="keepSendStr" data-str="6"></image>
+                </view>
+
+                <image src="../../icon/triangle.png" class="center-controller__down" bindtap="sendStr" data-str="7"></image>
+
+            </view>
+        </view>
+        <view class="buttom">
+            <view class="buttom__controller-info">
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">{{input[7]?input[7]:0}}</view>
+                    <view class="buttom__controller-info__text">左电机电流</view>
+                </view>
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">{{input[8]?input[8]:0}}</view>
+                    <view class="buttom__controller-info__text">泵电机电流</view>
+                </view>
+                <view class="buttom__controller-info__item">
+                    <view class="buttom__controller-info__value">{{input[9]?input[9]:0}}</view>
+                    <view class="buttom__controller-info__text">右电机电流</view>
+                </view>
+
+            </view>
+            <view class="{{isConnect? 'buttom-controller-not-connect' : 'buttom-controller-connected' }}" bindtap="deviceControl"> {{isConnect?'断开连接':'选择设备'}} </view>
+        </view>
+    </view>
+</view>
+<!--页面输入框,提示框-->
+<modal type="{{modalProps.type}}" hideCancel="{{modalProps.hideCancel}}" bind:handleSure="{{modalProps.handleSure}}" placeholder="{{modalProps.placeholder}}" isHidden="{{modalProps.isHidden}}" bind:handleCancel="{{modalProps.handleCancel}}" mask="{{true}}" okText="{{modalProps.okText}}">
+
+</modal>
+<!--用户隐私协议-->
+<modal mask="{{true}}" okText="同意" isHidden="{{!showPrivacy}}" type="privacy" openType="agreePrivacyAuthorization"  cancelText="不同意" bind:handleCancel="handleCancelPrivacyAuthorization" bind:handleAgreePrivacyAuthorization="handleAgreePrivacyAuthorization">
+    <view class="privacy">
+        <view class="privacy-pre">阅读并同意</view>
+        <view class="privacy-text" bindtap="handleOpenPrivacyContract">{{privacyContractName}}</view>
+    </view>
+</modal>
+<!--搜索附件蓝牙设备列表-->
+<view class="search" hidden="{{isSearchHidden?isDelay:isSearchHidden}}">
+    <view class="search-mask"></view>
+    <view class="search-content">
+        <view class="search-title">
+            <text>{{''}}</text>
+            <view class="search-title__text">附近的蓝牙</view>
+            <image bindtap="refresh" class="{{refresh?'search-title__image search-title__image-animation':'search-title__image'}}" src="../../icon/refresh.png"></image>
+        </view>
+        <scroll-view scrollY class="search-scroll">
+            <view bindtap="connect" class="search-scroll__device" data-deviceId="{{item.deviceId}}" data-deviceName="{{item.deviceName}}" data-localName="{{item.localName}} " data-name="{{item.name}}" wx:for="{{devices}}" wx:key="deviceId">
+                <view class="search-scroll__device-top">
+                    <view class="device_name">{{item.deviceName}} {{envVersion!='正式版' && item.deviceName=='吸污机'? '('+ item.name +')':''}}</view>
+                    <view class="device_stateRed" wx:if="{{!isConnect}}"> {{('吸污机'==item.deviceName)?'未连接':''}} </view>
+                    <view class="device_stateGreen" wx:else> {{isConnect?lastestConnecteddevice.deviceId==item.deviceId?'已连接':'':''}} </view>
+                </view>
+                <view class="search-scroll__device-bottom">
+                    <view class="device_id">{{'deviceId: '+item.deviceId}}</view>
+                    <view class="rrsi">RRSI: {{item.RSSI}}</view>
+                </view>
+            </view>
+            <view wx:if="{{!devices[0].deviceId}}" class="search-scroll__no-device-text">没有发现设备</view>
+
+        </scroll-view>
+        <view bindtap="hideSearchlist" class="search-hide">
+            <image src="../../icon/closeSearchList.png" class="search-hide__image"></image>
+        </view>
+    </view>
+
+</view>
