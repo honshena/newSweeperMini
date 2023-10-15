@@ -23,6 +23,12 @@ Component({
         },
         mask: {
             type: Boolean
+        },
+        openType: {
+            type: String
+        },
+        cancelText: {
+            type: String
         }
     },
 
@@ -56,7 +62,9 @@ Component({
                 isInput: false
             })
         },
-
+        handleAgreePrivacyAuthorization() {
+            this.triggerEvent('handleAgreePrivacyAuthorization')
+        },
         async handleSure() {
             //防止多次点击
             if (this.isHandleSure) return;

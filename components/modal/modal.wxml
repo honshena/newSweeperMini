@@ -8,8 +8,9 @@
             <slot></slot>
         </view>
         <view class="{{hideCancel?'modal-btn modal-btn-single':'modal-btn'}}">
-            <view hidden="{{hideCancel}}" bindtap="handleCancel" class="modal-btn-cancel">取消</view>
-            <view bindtap="handleSure" class="modal-btn-sure">{{okText?okText:'确定'}}</view>
+            <view hidden="{{hideCancel}}" bindtap="handleCancel" class="modal-btn-cancel">{{cancelText?cancelText:'取消'}}</view>
+            <button wx:if="{{type==='privacy'}}" open-type="{{openType}}" bindtap="handleSure" class="modal-btn-sure" bindagreeprivacyauthorization="handleAgreePrivacyAuthorization">{{okText?okText:'确定'}}</button>
+            <view wx:else="" bindtap="handleSure" class="modal-btn-sure">{{okText?okText:'确定'}}</view>
         </view>
     </view>
 
