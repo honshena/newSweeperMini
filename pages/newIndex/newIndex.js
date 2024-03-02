@@ -162,9 +162,10 @@ Page({
     },
 
     async onShow() {
+        const useTest = false
         //解包测试: 升级和通讯故障测试
         //this.resolvePackage([0, 1, 2, 3, 4, 2, 6, 7, 8, 9, 10, 11, 12])
-        if (version === version_develop) {
+        if (version === version_develop && useTest) {
             let count = 0,
                 arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
             setInterval(() => {
@@ -927,7 +928,7 @@ Page({
             this.cheekSetting(inputInd, this.newInput[inputInd]);
         }
         this.newInput = input;
-        console.log('sendstr ',data)
+        console.log('sendstr ', data)
         buletoothManaeger.writeBLECharacteristicValue(data)
     },
     //用户点击左转和右转
