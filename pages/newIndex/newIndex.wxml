@@ -1,3 +1,4 @@
+<wxs src="./newIndex.wxs" module="utils" />
 <view class="page">
     <!--顶部导航栏navigationBar-->
     <view class="navigation-container">
@@ -10,19 +11,19 @@
             </view>
         </view>
     </view>
-
+    <!-- <view bindtap="otaUpdateSend">ota测试 </view> -->
     <view class="page-content" style="min-height:{{pageContenHeight}}px">
         <view class="top">
             <view class="top-setting">
-                <view class="top-setting__image-wrapper-left">
-                    <image src="../../icon/clean.png" bindtap="sendStr" class="top-setting__image-left" data-str="1"></image>
+                <view class="top-setting__image-wrapper-left" bindtap="sendStr" data-str="1">
+                    <image src="../../icon/clean.png" class="top-setting__image-left" />
                 </view>
                 <view class="top-setting__image-wrapper-center" bindtap="showInput" data-i="4">
                     <image src="../../icon/time.png" class="top-setting__image-center"></image>
-                    <text lines="1" class="top-setting__text-center">{{input[4]?input[4]:'1/1000'}}</text>
+                    <text lines="1" class="top-setting__text-center">{{input[4] ? input[4] : '1/1000'}}</text>
                 </view>
-                <view class="top-setting__image-wrapper-right">
-                    <text lines="1" class="top-setting__text-right" bindtap="sendStr" data-str="2">{{input[6]?input[6]:'3'}}h</text>
+                <view class="top-setting__image-wrapper-right" bindtap="sendStr" data-str="2">
+                    <text lines="1" class="top-setting__text-right">{{input[6]?input[6]:'3'}}h</text>
                 </view>
             </view>
             <view class="top-controller">
@@ -49,7 +50,7 @@
                     </picker>
 
                     <view class="top-controller__meaning">{{/*机型*/}} </view>
-                    <view class="top-controller__value">{{model}}</view>
+                    <view class="top-controller__value">{{model_select[input[5] ? input[5] - 1 : 0]}}</view>
                 </view>
                 <view class="top-controller__item">
                     <view class="top-controller__item__bac" bindtap="showInput" data-i="3">
@@ -81,15 +82,15 @@
         <view class="buttom">
             <view class="buttom__controller-info">
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">{{input[7]?input[7]:0}}</view>
+                    <view class="buttom__controller-info__value">{{utils.convertToCurrent(input[7] || 0)}} A</view>
                     <view class="buttom__controller-info__text">左电机电流</view>
                 </view>
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">{{input[8]?input[8]:0}}</view>
+                    <view class="buttom__controller-info__value">{{utils.convertToCurrent(input[8] || 0)}} A</view>
                     <view class="buttom__controller-info__text">泵电机电流</view>
                 </view>
                 <view class="buttom__controller-info__item">
-                    <view class="buttom__controller-info__value">{{input[9]?input[9]:0}}</view>
+                    <view class="buttom__controller-info__value">{{utils.convertToCurrent(input[9] || 0)}} A</view>
                     <view class="buttom__controller-info__text">右电机电流</view>
                 </view>
 
@@ -99,11 +100,15 @@
     </view>
 </view>
 <!--页面输入框,提示框-->
-<modal type="{{modalProps.type}}" hideCancel="{{modalProps.hideCancel}}" bind:handleSure="{{modalProps.handleSure}}" placeholder="{{modalProps.placeholder}}" isHidden="{{modalProps.isHidden}}" bind:handleCancel="{{modalProps.handleCancel}}" mask="{{true}}" okText="{{modalProps.okText}}">
-
+<modal type="{{modalProps.type}}" hideCancel="{{modalProps.hideCancel}}" bind:handleSure="{{modalProps.handleSure}}" placeholder="{{modalProps.placeholder}}" isHidden="{{modalProps.isHidden}}" bind:handleCancel="{{modalProps.handleCancel}}" mask="{{true}}" value="{{modalProps.value}}" okText="{{modalProps.okText}}">
+    <!-- 仅ota升级时展示进度条 -->
+    <view class="ota__progress" wx:if="{{modalProps.id==='ota'}}">
+        <progress percent="{{modalProps.value}}" color="#10AEFF" active active-mode="forwards" stroke-width="6" show-info border-radius='2' />
+        <view class="ota__progress__info">正在升级中，请勿退出小程序或关闭蓝牙通信</view>
+    </view>
 </modal>
 <!--用户隐私协议-->
-<modal mask="{{true}}" okText="同意" isHidden="{{!showPrivacy}}" type="privacy" openType="agreePrivacyAuthorization"  cancelText="不同意" bind:handleCancel="handleCancelPrivacyAuthorization" bind:handleAgreePrivacyAuthorization="handleAgreePrivacyAuthorization">
+<modal mask="{{true}}" okText="同意" isHidden="{{!showPrivacy}}" type="privacy" openType="agreePrivacyAuthorization" cancelText="不同意" bind:handleCancel="handleCancelPrivacyAuthorization" bind:handleAgreePrivacyAuthorization="handleAgreePrivacyAuthorization">
     <view class="privacy">
         <view class="privacy-pre">阅读并同意</view>
         <view class="privacy-text" bindtap="handleOpenPrivacyContract">{{privacyContractName}}</view>
@@ -114,11 +119,13 @@
     <view class="search-mask"></view>
     <view class="search-content">
         <view class="search-title">
-            <text>{{''}}</text>
+            <text />
             <view class="search-title__text">附近的蓝牙</view>
             <image bindtap="refresh" class="{{refresh?'search-title__image search-title__image-animation':'search-title__image'}}" src="../../icon/refresh.png"></image>
         </view>
         <scroll-view scrollY class="search-scroll">
+            <!--下面这个view是为了防止设备列表没有超出高度就出现滚动条-->
+            <view style="content: ''; overflow: hidden;" />
             <view bindtap="connect" class="search-scroll__device" data-deviceId="{{item.deviceId}}" data-deviceName="{{item.deviceName}}" data-localName="{{item.localName}} " data-name="{{item.name}}" wx:for="{{devices}}" wx:key="deviceId">
                 <view class="search-scroll__device-top">
                     <view class="device_name">{{item.deviceName}} {{envVersion!='正式版' && item.deviceName=='吸污机'? '('+ item.name +')':''}}</view>
@@ -126,7 +133,8 @@
                     <view class="device_stateGreen" wx:else> {{isConnect?lastestConnecteddevice.deviceId==item.deviceId?'已连接':'':''}} </view>
                 </view>
                 <view class="search-scroll__device-bottom">
-                    <view class="device_id">{{'deviceId: '+item.deviceId}}</view>
+                    <!-- 隐藏deviceId -->
+                    <view class="device_id" hidden>{{'deviceId: '+item.deviceId}}</view>
                     <view class="rrsi">RRSI: {{item.RSSI}}</view>
                 </view>
             </view>

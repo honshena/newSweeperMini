@@ -3,6 +3,7 @@ const {
     logDebug,
     logWarn,
     logError,
+    logDebugInfo,
 } = require('./utils/log')
 App({
     globalData: {
@@ -11,7 +12,7 @@ App({
         location: {}
     },
     onLaunch(launchInfo) {
-        logInfo(`[app.onLaunch]`, launchInfo)
+        logDebugInfo(`[app.onLaunch]: 小程序启动页${launchInfo.path}`, {debug: true, info: launchInfo})
         //自动更新小程序
         this.autoUpdate()
         this.getUserStting()

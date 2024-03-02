@@ -4,6 +4,7 @@ const {
 } = require('../../config/const.js')
 const {
     OTAVersion,
+    OTA_UPDATE_SEND_INTERVAL,
     LASTEST_VSERSION
 } = require('../../OTA/update.js')
 const {
@@ -11,11 +12,14 @@ const {
     logWarn,
     logError,
     logDebug,
+    logDebugInfo,
 } = require('../../utils/log.js')
 const {
     BluetoothManager
 } = require("../../BluetoothController.js")
 const {
+    version,
+    version_develop,
     deviceConfig,
     isAcceptDataValid,
     warningH,
@@ -24,6 +28,7 @@ const {
     acceptInterval,
     awaitInterval,
 } = require('../../config/bluetooth.js')
+const log = require('../../utils/log.js')
 const {
     showLoading,
     hideLoading,
@@ -55,7 +60,16 @@ Page({
         },
         model_select: ["双体", "单体", "爬墙"],
         model: "双体",
-        devices: [], //存放用于渲染的设备列表
+        devices: [
+            // 测试ui使用
+            // {
+            //     deviceId: 'CD3A4E18-EC17-C65B-0A29-B6A11D17EA5E',
+            //     deviceName: 'device name',
+            //     localName: 'local name',
+            //     name: 'name',
+            //     RSSI: -87,
+            // },
+        ], //存放用于渲染的设备列表
         //显示隐私协议
         showPrivacy: false,
         //隐私协议名称
@@ -99,7 +113,8 @@ Page({
             hideCancel: false,
             mask: true,
             placeholder: '',
-        }
+            value: '',
+        },
     },
     defauleModalProps: {
         type: 'input',
@@ -107,15 +122,23 @@ Page({
         hideCancel: false,
         mask: true,
         placeholder: '',
+        value: '',
     },
     //持续发送字符串定时器id
     keepSend: "",
-
+    // 新的input
+    newInput: [],
     async onLoad(onLoadInfo) {
-        logInfo("[newIndex.onLoad]", onLoadInfo)
+        logDebugInfo("[newIndex.onLoad]进入小程序新页面onLoad", {
+            debug: true,
+            info: onLoadInfo,
+        });
         //获取手机信息
         const sysInfo = wx.getSystemInfoSync()
-        logInfo(`手机型号: [${sysInfo.brand} ${sysInfo.model}], 手机系统: [${sysInfo.system}]`, sysInfo)
+        logDebugInfo(`手机型号: [${sysInfo.brand} ${sysInfo.model}], 手机系统: [${sysInfo.system}]`, {
+            debug: true,
+            info: sysInfo
+        });
 
         //初始化导航栏高度,要在onload执行,onshow执行会有页面异常跳动
         this.initNavBar()
@@ -126,7 +149,7 @@ Page({
             lastestConnecteddevice = getLatesDeviceStorage(),
             input = getInputStorage()
 
-        logInfo(`硬件配置, 安全时间: [${input[4]?input[4]:'无'}], 左电机转速: [${input[1]?input[1]:'无'}], 右电机转速: [${input[3]?input[3]:'无'}], 灵敏度: [${input[2]?input[2]:'无'}], 机型: [机型${input[5]?input[5]:'无'}], 硬件配置数组: `, input)
+        logInfo(`硬件配置, 安全时间: [${input[4] ? input[4] : '无'}], 左电机转速: [${input[1] ? input[1] : '无'}], 右电机转速: [${input[3] ? input[3] : '无'}], 灵敏度: [${input[2] ? input[2] : '无'}], 机型: [机型${input[5] ? input[5] : '无'}], 硬件配置数组: `, input)
 
         this.setData({
             lastestConnecteddevice,
@@ -140,8 +163,22 @@ Page({
 
     async onShow() {
         //解包测试: 升级和通讯故障测试
-        //this.resolvePackage([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-
+        //this.resolvePackage([0, 1, 2, 3, 4, 2, 6, 7, 8, 9, 10, 11, 12])
+        if (version === version_develop) {
+            let count = 0,
+                arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+            setInterval(() => {
+                if (count > 5) {
+                    count = 0;
+                    arr.reverse()
+                }
+                this.resolvePackage(arr);
+                count++;
+            }, 2000)
+            this.setData({
+                isConnect: true
+            })
+        }
         //初始化附件设备列表
         this.devicesMap = new Map()
         //获取小程序版本信息
@@ -196,7 +233,10 @@ Page({
         //根据不同的版本在日志中打印不同的信息
         envVersion != '正式版' ?
             logWarn(`当前小程序使用: [${envVersion} ${appInfo.miniProgram.version}]`, appInfo) :
-            logInfo(`当前小程序使用: [${envVersion} ${appInfo.miniProgram.version}]`, appInfo)
+            logDebugInfo(`当前小程序使用: [${envVersion} ${appInfo.miniProgram.version}]`, {
+                debug: true,
+                info: appInfo
+            })
 
         this.setData({
             appInfo,
@@ -208,7 +248,11 @@ Page({
     showPrivacy() {
         wx.getPrivacySetting({
             success: res => {
-                console.log(res) // 返回结果为: res = { needAuthorization: true/false, privacyContractName: '《xxx隐私保护指引》' }
+                logDebugInfo({
+                    debug: true,
+                    info: ['获取隐私协议设置成功', res],
+                });
+                // console.log(res) // 返回结果为: res = { needAuthorization: true/false, privacyContractName: '《xxx隐私保护指引》' }
                 if (res.needAuthorization) {
                     // 需要弹出隐私协议
                     this.setData({
@@ -219,7 +263,9 @@ Page({
                     // 用户已经同意过隐私协议，所以不需要再弹出隐私协议，也能调用隐私接口
                 }
             },
-            fail: () => {},
+            fail: (err) => {
+                logWarn('获取隐私信息失败', err);
+            },
             complete: () => {}
         })
     },
@@ -227,13 +273,18 @@ Page({
     handleOpenPrivacyContract() {
         // 打开隐私协议页面
         wx.openPrivacyContract({
-            success: () => {}, // 打开成功
-            fail: () => {}, // 打开失败
+            success: () => {
+                logInfo('跳转到隐私协议页面成功')
+            }, // 打开成功
+            fail: (err) => {
+                logWarn('跳转到隐私协议页面失败', err)
+            }, // 打开失败
             complete: () => {}
         })
     },
     //用户同意隐私协议
     handleAgreePrivacyAuthorization() {
+        logInfo('[newIndex.handleAgreePrivacyAuthorization]: 用户同意隐私协议');
         this.setData({
             showPrivacy: false
         })
@@ -261,6 +312,18 @@ Page({
             }
 
     },
+    //弹窗栈 数组
+    modalStack: [],
+    getModalTop() {
+        return this.modalStack[this.modalStack.length - 1]
+    },
+    // 增加弹窗
+    pushModal(modalProps) {
+        if (!this.modalStack) {
+            this.modalStack = []
+        }
+        this.modalStack.push(modalProps)
+    },
     //重连设备并重置连接状态
     /**
      * 
@@ -280,8 +343,28 @@ Page({
     acceptPackagetInterval: null, //检查接受包的定时器
     lastAcceptPackage: new Date(), //最后一次接受包的时间
     alreadyWarnController: false, //是否显示控制器异常
-    BLEresolvepackage(arr) {
-        logInfo('BLEresolvepackage: ', arr)
+    // 检查收发包是否超时
+    startAcceptPackageTimeout() {
+        if (!this.acceptPackagetInterval && !this.alreadyWarnController) {
+            this.acceptPackagetInterval = setInterval(() => {
+                let now = new Date(),
+                    timeout = now - this.lastAcceptPackage;
+                if (timeout > acceptMAXInterval) {
+                    logWarn(`[控制器异常]: 接收包的时间超时, 间隔${timeout} >${acceptMAXInterval}`);
+                    if (!this.alreadyWarnController) {
+                        showToast('控制器异常，请重启控制器', {
+                            duration: 2000
+                        })
+                    }
+                    this.alreadyWarnController = true
+                    clearInterval(this.acceptPackagetInterval)
+                    this.acceptPackagetInterval = null
+                }
+            }, acceptMAXInterval)
+        }
+    },
+    BLEResolvePackage(arr) {
+        // logInfo('BLEResolvePackage: ', arr)
         let check = isAcceptDataValid(arr)
         if (!check && !this.alreadyWarnController) {
             this.packageErrorCount += 1;
@@ -290,27 +373,15 @@ Page({
                     duration: 2000
                 })
                 this.alreadyWarnController = true;
-                logWarn(`[控制器异常],接收包校验: ${check?'通过':'不通过'},包检查出错:${this.packageErrorCount}次,lastAcceptPackage: ${this.lastAcceptPackage.toISOString()}`)
+                logWarn(`[控制器异常],接收包校验: ${check ? '通过' : '不通过'},包检查出错:${this.packageErrorCount}次,接收package: ${arr}`)
                 this.packageErrorCount = 0
             }
-
         }
+        // 包没有问题
+        this.packageErrorCount = 0;
 
         //启动发送数据监测
-        if (!this.acceptEeptInterval) {
-            this.acceptPackagetInterval = setInterval(() => {
-                let now = new Date()
-                if (now - this.lastAcceptPackage > acceptMAXInterval && !this.alreadyWarnController) {
-                    logWarn(`[控制器异常]: 接收包的时间超时`)
-                    showToast('控制器异常，请重启控制器', {
-                        duration: 2000
-                    })
-                    this.alreadyWarnController = true
-                    clearInterval(this.acceptPackagetInterval)
-                    this.acceptPackagetInterval = null
-                }
-            }, acceptMAXInterval)
-        }
+        this.startAcceptPackageTimeout();
         //拆包
         this.resolvePackage(arr)
         //重置接收包的时间
@@ -324,11 +395,14 @@ Page({
         //解包的文档看document
         let ota = OTAVersion.get(LASTEST_VSERSION)
         if (ota.version > arr[1] && !this.alreadyUpdate) {
-            this.showWarn('有新的版本是否升级', {
-                hideCancel: false,
-                handleSure: 'otaUpdate',
-                handleCancel: 'hideModal'
-            })
+            logInfo(`当前[主板版本: ${arr[1]}], 当前最新版本: ${LASTEST_VSERSION}`);
+            // 直接进入升级
+            this.otaUpdate();
+            // this.showWarn('有新的版本是否升级', {
+            //     hideCancel: false,
+            //     handleSure: 'otaUpdate',
+            //     handleCancel: 'hideModal'
+            // })
             ota.version = arr[1]
             this.alreadyUpdate = true
         }
@@ -356,33 +430,57 @@ Page({
          * 1: 左电机
          * 2: 灵敏度
          * 3: 右电机
-         * 4: 安全时间
+         * 4: 安全时间 => 9, 目前用户输入是啥就显示啥不按包里的数据显示
          * 5: 机型
          * 6: 定时
          * 7: 左电机电流
          * 8: 泵电机电流
          * 9: 右电机电流
          */
-        let input = [0, arr[3], arr[8], arr[4], arr[9], arr[2], this.data.input[6], arr[5], arr[7], arr[6]]
-        this.setData({
-            input: [...input]
-        })
+        const input = [0, arr[3], arr[8], arr[4], this.newInput?.[4], arr[2], arr[12], arr[5], arr[7], arr[6]];
+        // 是否需要更新input,当第一次校验失败时不更新
+        let needUpdateInput = true;
+        // 检查设置的是否生效
+        if (this.needSettingCheck) {
+            if (this.checkSettingIsActive(input)) {
+                // 两次内检查到成功
+                this.settingCheckErrorCount = 0;
+                this.needSettingCheck = false;
+                showToast('更改设置成功');
+            } else if (this.settingCheckErrorCount > 1) {
+                // 超过两次检查失败
+                this.settingCheckErrorCount = 0;
+                this.needSettingCheck = false;
+                showToast('更改设置失败');
+            } else {
+                // 包含第一次检查失败时的情况
+                needUpdateInput = false;
+            }
+        }
+        // 需要更新input
+        if (needUpdateInput) {
+            // console.log('set input', input)
+            this.setData({
+                input,
+            })
+        }
     },
     //显示提示,是否需要上传日志
     showWarn(text, op) {
         if (!text) return;
-        logWarn('[showWarn]故障: ', text)
-        const prop = {
+        logWarn('[showWarn]警告: ', text)
+        const modalProps = {
             isHidden: false,
             type: 'text',
             placeholder: text,
             hideCancel: true,
+            value: undefined,
             handleSure: 'hideModal', //调用this.hideModal()
             ...op,
         }
-        this.modalStack.push(prop)
+        this.pushModal(modalProps)
         this.setData({
-            modalProps: prop
+            modalProps,
         })
     },
     //读取蓝牙数据
@@ -391,18 +489,20 @@ Page({
         //需要校验包的合法性
         if (value.byteLength === 18) {
             //发送的是数据包
-            this.BLEresolvepackage(ab2hex(value))
+            this.BLEResolvePackage(ab2hex(value))
         } else {
-            //发送的是字符串
-            let str = ab2str(value)
-            //发送的是
-            if (str === "boot ok") {
-                this.otaUpdateSend()
+            //接收的是字符串
+            let str = ab2str(value);
+            //接收的是boot ok, 且用户点击了更新
+            if (str === "boot ok\r\n" && this.updateConnectIntarl) {
+                // 先清除定时器
+                clearInterval(this.updateConnectIntarl);
                 this.updateErrorCount = 0;
-                clearInterval(this.updateConnectIntarl)
+                this.otaUpdateSend();
             }
             if (str === 'program ok') {
-                showToast('ota成功升级')
+                showToast('ota成功升级');
+                this.updateSuccess = true;
             }
         }
 
@@ -410,7 +510,8 @@ Page({
     updateErrorCount: 0, //更新出错计数器
     updateConnectIntarl: null, //建立连接定时器
     otaUpdate() {
-        logInfo('click [otaUpate]: ', this.updateErrorCount)
+        // 点击确认升级
+        logInfo('click [otaUpate]: error count', this.updateErrorCount)
         this.hideModal()
         if (!this.updateConnectIntarl) {
             this.updateConnectIntarl = setInterval(() => {
@@ -418,46 +519,131 @@ Page({
                 if (this.updateErrorCount >= 3) {
                     clearInterval(this.updateConnectIntarl)
                     this.updateConnectIntarl = null
-                    this.showWarn('ota 更新出错')
+                    this.showWarn('ota 更新出错');
+                    buletoothManager.startIntervalSendData(0);
                 }
                 buletoothManager.writeBLECharacteristicValue("k 01")
             }, awaitInterval)
         }
         this.updateErrorCount = 0;
     },
-
+    updateSuccess: false,
+    updateSuccessInterval: null,
+    isUpdate: false,
     async otaUpdateSend() {
+        if (this.isUpdate) return;
+        this.isUpdate = true;
+        buletoothManager.stopIntervalSendData();
+        // 初始化更新结果,和定时器
+        this.updateSuccess = false;
+        this.updateSuccessInterval = null;
+        // 接收字符串时不要检查包时间
+        clearInterval(this.acceptPackagetInterval);
         setTimeout(async () => {
             const ota = OTAVersion.get(LASTEST_VSERSION)
             //向上取整
             const length = Math.ceil(ota.file.length / 20)
-            let arr = []
-            const timers = []
+            let arr = [],
+                process = 0;
+            const timers = [];
+
+            // 发送更新的ota升级包
             for (let i = 0; i < length; i++) {
+                let sendDataLength = i * 20 + 20; //当前数据包的末尾长度
                 let timer = setTimeout(async () => {
-                    arr = ota.file.slice(i * 20, i * 20 + 20)
-                    //仅在50%和100%时上传日志
+                    arr = ota.file.slice(i * 20, sendDataLength);
+                    process = Math.floor((i + 1) / length * 100)
                     this.setData({
                         modalProps: {
-                            placeholder: `OTA升级进度: ${Math.floor((i+1)/length*100)}%`,
+                            placeholder: `OTA升级进度: ${process}%`,
                             hideCancel: true,
-                            type: 'text',
-                            handleSure: i == length - 1 ? 'hideModal' : '',
-                            okText: i == length - 1 ? '升级成功' : '请等待',
-
+                            type: 'ota',
+                            id: 'ota',
+                            value: process,
+                            handleSure: '',
+                            okText: 'OTA升级中'
+                            // handleSure: i == length - 1 ? 'hideModal' : '',
+                            // okText: i == length - 1 ? '升级结束' : 'OTA升级中',
                         }
                     })
-                    const writeRes = await buletoothManager.writeBLECharacteristicValue(arr)
-                    if (!writeRes.res) {
-                        this.hideModal()
-                        this.showWarn('升级失败,请稍后重试')
-                        timers.forEach(v => clearTimeout(v))
+                    //仅在0%,50%和100%时上传日志
+                    if (process === 0 || process === 50 || process === 100) {
+                        logInfo(`OTA升级进度: ${process}, 已发送数据包: ${sendDataLength}`)
                     }
-                }, i * acceptInterval)
+                    const writeRes = await buletoothManager.writeBLECharacteristicValue(arr);
+                    if (!writeRes.res) {
+                        this.hideModal();
+                        this.showWarn('升级失败,请稍后重试');
+                        this.isUpdate = false;
+                        timers.forEach(v => clearTimeout(v));
+                        buletoothManager.startIntervalSendData(0);
+                    }
+                    // 发送完成后需要判断是否成功
+                    if (i === length - 1) {
+                        // 不管失败还是成功重新发0
+                        buletoothManager.startIntervalSendData(0);
+                        // 重新开启报文检测
+                        this.startAcceptPackageTimeout();
+                        // 判断是否接收到boot ok,如果没有则报错升级失败, 在接收到时移除定时器,
+                        // 这个 this.updateSuccessInterval暂时没有清除的地方
+                        this.updateSuccessInterval = setTimeout(() => {
+                            this.isUpdate = false;
+                            // 接收到program ok时updateSuccess为true;
+                            if (!this.updateSuccess) {
+                                this.hideModal();
+                                this.showWarn('升级失败，请关闭微信后台并重启小程序以再次升级');
+                            } else {
+                                // 显示升级成功弹窗
+                                this.setData({
+                                    modalProps: {
+                                        placeholder: `OTA升级进度: ${process}%`,
+                                        hideCancel: true,
+                                        type: 'ota',
+                                        id: 'ota',
+                                        value: 100,
+                                        handleSure: '',
+                                        okText: 'OTA升级完成',
+                                        handleSure: 'hideModal',
+                                    }
+                                })
+                            }
+                        }, 2000)
+                    }
+                }, i * OTA_UPDATE_SEND_INTERVAL)
                 timers.push(timer)
             }
+
             //等待主板准备2s
         }, 2000)
+    },
+    //是否需要检查设置生效
+    needSettingCheck: false,
+    settingCheckErrorCount: 0, //检查中出错的次数
+    oldSetting: new Map(), //旧的设置,需要与新的对比, key为input的索引,value为input的值
+    cheekSetting(key, value) {
+        // 已经处于检测队列中
+        if (!this.needSettingCheck) {
+            this.settingCheckErrorCount = 0;
+            this.needSettingCheck = true;
+        }
+        this.oldSetting.set(isNaN(parseInt(key)) ? key : parseInt(key), value);
+    },
+    // 检查更改的设置是否成功: 即是否成功写入到主板
+    checkSettingIsActive(input) {
+        for (let [k, v] of this.oldSetting.entries()) {
+            if (v !== input[k]) {
+                this.settingCheckErrorCount += 1;
+                return false;
+            }
+            this.oldSetting.delete(k);
+            // 通过校验后存储设置到本地
+            wx.setStorage({
+                key: "input",
+                data: input
+            });
+        }
+        this.needSettingCheck = false;
+        return true;
     },
     //连接蓝牙设备
     async connectBLEDevice(lastestConnecteddevice, reconnect) {
@@ -466,7 +652,7 @@ Page({
         if (!prepared) {
             return
         }
-        showLoading(`${reconnect?'自动重连':'连接'}` + (lastestConnecteddevice.deviceName ? lastestConnecteddevice.deviceName : UNKNOWNDEVICE))
+        showLoading(`${reconnect ? '自动重连' : '连接'}` + (lastestConnecteddevice.deviceName ? lastestConnecteddevice.deviceName : UNKNOWNDEVICE))
         setTimeout(() => {
             hideLoading()
         }, 5000) //test
@@ -513,9 +699,15 @@ Page({
                 return resolve(false)
             }
             if (onlyBluetooth)
-                logInfo("[蓝牙正常打开]", prepared)
+                logDebugInfo("[蓝牙正常打开]", {
+                    debug: true,
+                    info: prepared
+                })
             else
-                logInfo("[位置信息与蓝牙正常打开]", prepared)
+                logInfo("[位置信息与蓝牙正常打开]", {
+                    debug: true,
+                    info: prepared
+                })
             //上报用户位置,只上报一次
             if (!self.isReportRealPlace) {
                 //获取用户实际地理位置
@@ -687,18 +879,24 @@ Page({
     sendStr: function (e) {
         //振动
         wx.vibrateShort({
-            type: 'light'
+            type: 'medium'
         })
         let data = e.currentTarget.dataset.str,
-            {
-                input
-            } = this.data
+            input = [...this.data.input],
+            needSettingCheck = false,
+            inputInd;
         //日志上报用户点击行为
         switch (data) {
             case '1':
+                // 机型
+                needSettingCheck = true;
+                inputInd = 5;
                 logInfo(`用户[点击]${this.data.model == this.data.model_select[2] ? '爬墙' : '清理'}`);
                 break;
             case '2':
+                // 3 5 8 时间
+                needSettingCheck = true;
+                inputInd = 6;
                 if (input[6] == 3)
                     input[6] = 5
                 else if (input[6] == 5)
@@ -708,8 +906,8 @@ Page({
                 else
                     input[6] = 5
                 this.setData({
-                    input
-                })
+                    input,
+                });
                 logInfo(`用户[点击]定时: ${input[6]}h`);
                 break;
             case '3':
@@ -723,18 +921,20 @@ Page({
                 break;
         }
 
-
-
         if (!this.data.isConnect)
             return showToast("请先连接蓝牙");
-
-        buletoothManager.writeBLECharacteristicValue(data)
+        if (needSettingCheck) {
+            this.cheekSetting(inputInd, this.newInput[inputInd]);
+        }
+        this.newInput = input;
+        console.log('sendstr ',data)
+        buletoothManaeger.writeBLECharacteristicValue(data)
     },
     //用户点击左转和右转
     keepSendStr: async function (e) {
         //振动
         wx.vibrateShort({
-            type: 'light'
+            type: 'medium'
         })
         if (!this.data.isConnect) {
             showToast("请先连接蓝牙")
@@ -759,6 +959,9 @@ Page({
     //发送输入的设置到硬件
     handleInput() {
         const {
+            newInput
+        } = this;
+        const {
             input,
             inputInd,
             isConnect
@@ -767,7 +970,7 @@ Page({
             showToast("请先连接蓝牙")
             return
         }
-        if (isNaN(parseInt(input[inputInd]))) {
+        if (isNaN(parseInt(newInput[inputInd]))) {
             showToast("请输入正确数值")
             return
         }
@@ -776,8 +979,7 @@ Page({
             data: input
         });
         const prefix = "f".charAt().charCodeAt() + parseInt(inputInd) - 1;
-        let data = parseInt(input[inputInd])
-
+        let data = parseInt(newInput[inputInd]);
         //安全时间需要除以10取整
         if (inputInd == 4) {
             if (data < 10) data = 1;
@@ -786,25 +988,33 @@ Page({
 
         data = parseInt(data)
 
-        //console.log([prefix, data]);
-        buletoothManager.writeBLECharacteristicValue([prefix, data])
-
-        setTimeout(() => {
-            if (input[inputInd] === this.data.input[inputInd]) {
-                showToast('更改设置成功')
-                this.hideModal()
-            } else {
-                showToast('更改设置失败')
-            }
-        }, 500)
+        console.log('handle input', data);
+        buletoothManager.writeBLECharacteristicValue([prefix, data]);
+        // 检查设置是否成功
+        // inputInd是字符串不能使用 inputInd!==4
+        if (inputInd != 4) {
+            this.cheekSetting(inputInd, this.newInput[inputInd]);
+        }
+        this.hideModal();
+        // setTimeout(() => {
+        //     if (input[inputInd] === this.data.input[inputInd]) {
+        //         showToast('更改设置成功')
+        //         this.hideModal()
+        //     } else {
+        //         showToast('更改设置失败')
+        //     }
+        // }, 500)
     },
 
     //用户点击选择机型
     changeModel(e) {
         var data = parseInt(e.detail.value) + 1;
-        logInfo(`用户[点击]选择机型, 更改机型为: [${this.data.model_select[data-1]}], index.changeModel`);
-        let input = this.data.input;
-        input[5] = data
+        logInfo(`用户[点击]选择机型, 更改机型为: [${this.data.model_select[data - 1]}], index.changeModel`);
+        let input = [...this.data.input];
+        input[5] = data;
+        this.newInput = input;
+        // 检查设置是否成功
+        this.cheekSetting(5, this.newInput[5]);
         this.setData({
             input,
             inputInd: 5,
@@ -851,11 +1061,12 @@ Page({
             errFlag = true
         }
         //记录修改的配置
-        logInfo(`硬件配置更改, 安全时间: [${input[4]?input[4]:'无'}], 左电机转速: [${input[1]?input[1]:'无'}], 右电机转速: [${input[3]?input[3]:'无'}], 灵敏度: [${input[2]?input[2]:'无'}], 机型: [${input[5]?input[5]:'默认机型'}], 硬件配置数组: `, input)
+        logInfo(`硬件配置更改, 安全时间: [${input[4] ? input[4] : '无'}], 左电机转速: [${input[1] ? input[1] : '无'}], 右电机转速: [${input[3] ? input[3] : '无'}], 灵敏度: [${input[2] ? input[2] : '无'}], 机型: [${input[5] ? input[5] : '默认机型'}], 硬件配置数组: `, input)
         if (errFlag)
             return
+        this.newInput = input;
         this.setData({
-            input: [...input]
+            input,
         });
     },
     changeAndHandleInput(e) {
@@ -863,41 +1074,37 @@ Page({
         this.handleInput()
     },
     //修改安全时间
-    changeTime(e) {
-        let {
-            input
-        } = this.data, index = e.currentTarget.dataset.i
-        switch (input[4]) {
-            case 3:
-                input[4] = 5;
-                break
-            case 5:
-                input[4] = 8;
-                break;
-            case 8:
-                input[4] = 3;
-                break;
-            default:
-                input[4] = 3
-        }
-        this.setData({
-            input: [...input],
-            inputInd: index
-        })
-        this.handleInput()
+    // changeTime(e) {
+    //     let {
+    //         input
+    //     } = this.data, index = e.currentTarget.dataset.i
+    //     switch (input[4]) {
+    //         case 3:
+    //             input[4] = 5;
+    //             break
+    //         case 5:
+    //             input[4] = 8;
+    //             break;
+    //         case 8:
+    //             input[4] = 3;
+    //             break;
+    //         default:
+    //             input[4] = 3
+    //     }
+    //     this.setData({
+    //         input: [...input],
+    //         inputInd: index
+    //     })
+    //     this.handleInput()
 
-    },
-    //弹窗栈 数组
-    modalStack: [],
-    getModalTop() {
-        return this.modalStack[this.modalStack.length - 1]
-    },
+    // },
     //显示输入框
     showInput(e) {
         const index = e.currentTarget.dataset.i;
         let {
             inputPlaceholder,
             model,
+            input,
             model_select
         } = this.data;
         //上报用户点击输入框按钮的行为
@@ -940,6 +1147,7 @@ Page({
             modalProps: {
                 isHidden: false,
                 type: 'input',
+                value: input[parseInt(index)],
                 placeholder: inputPlaceholder,
                 handleCancel: 'hideModal', //调用this.hideModal()
                 handleSure: 'changeAndHandleInput', //调用this.changeAndHandleInput()
@@ -988,7 +1196,8 @@ Page({
     //断开蓝牙连接
     releaseBluetooth: function () {
         logInfo('用户[点击]释放蓝牙资源, index.releaseBluetooth')
-        buletoothManager.relaseBluetoothAll()
+        buletoothManager.relaseBluetoothAll();
+        clearInterval(this.acceptPackagetInterval);
         this.setData({
             isConnect: false
         });

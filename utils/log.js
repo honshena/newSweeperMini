@@ -1,3 +1,7 @@
+const {
+    version,
+    version_develop,
+} = require('../config/bluetooth');
 const log = wx.getRealtimeLogManager ? wx.getRealtimeLogManager() : null
 /**
  * 一般消息使用info
@@ -33,6 +37,25 @@ var logUtils = module.exports = {
         log.addFilterMsg(msg)
     },
     logCount: 1,
+    // 只在开发模式下显示详情
+    /* 
+    {
+        debug: boolean, //只在develop下显示
+        info: 显示的信息
+    }*/
+    logDebugInfo(...args) {
+        let info = [];
+        args.forEach(v => {
+            if (typeof v === 'object') {
+                if (v.debug && version_develop === version) {
+                    Array.isArray(v.info) ? info.push(...v.info) : info.push(v.info)
+                }
+            } else {
+                info.push(v);
+            }
+        })
+        logUtils.logInfo(...info);
+    },
     logDebug(...args) {
         logUtils.debug(`debug ${logUtils.logCount}: `, ...args)
         console.debug(`debug ${logUtils.logCount}: `, ...args)

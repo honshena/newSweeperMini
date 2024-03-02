@@ -96,6 +96,9 @@ const
     },
     //是否隐藏除吸污机以外的其他设备
     version = wx.getAccountInfoSync().miniProgram.envVersion,
+    isProduction = version === 'release', //是否为线上正式版
+    version__trial = 'trial',
+    version_develop = 'develop',
     hideOtherDevices = (version == 'develop') ? false : (version == 'trial') ? false : true,
     //发送数据的含义
     sendDataMeaning = new Map([
@@ -112,7 +115,7 @@ const
         ['104', '右电机'],
         ['105', '安全时间'],
         ['106', '机型'],
-
+        ['k 01', 'ota更新重试'],
     ]),
 
     /**
@@ -236,6 +239,73 @@ const
             value: 0XDD
         },
     ],
+    // 校验接收的数据返回对象
+    acceptDataValid = (arr) => {
+        let flag = -2, msg=''; //check位的flag定义为-1
+        if (arr[0] !== 0XEE) {
+            flag = 0; //包头校验
+            msg = '包头校验失败,不是0XEE'
+        }
+        if (arr[17] !== 0XDD){
+            flag = 17; //包尾校验
+            msg = '包尾校验失败,不是0XDD'
+        } 
+        let check = 0x00;
+        for (let i = 0; i < 16; i++) {
+          check += arr[i] & 0XFF;
+        }
+        check &= 0XFF;
+        if (check !== arr[16]){
+            flag = 16;
+            msg = `数据包总和${check}校验失败,不是${arr[16]}`
+        }
+        if (arr[1] > 200) {
+            flag = 1;
+            msg = '版本号校验失败(0~200)'
+        };
+        if (arr[2] > 10) {
+            flag = 2;
+            msg = '机型校验失败(0~10)'
+        }
+        if (arr[3] > 100) {
+            flag = 3;
+            msg = '速度左校验失败(0~100)'
+        }
+        if (arr[4] > 100) {
+            flag = 4;
+            msg = '速度右校验失败(0~100)'
+        }
+        if (arr[5] > 100){
+            flag = 5;
+            msg = '电流左校验失败(0~100)'
+        }
+        if (arr[6] > 100){
+            flag = 6;
+            msg = '电流右校验失败(0~100)'
+        }
+        if (arr[7] > 100) {
+            flag = 7;
+            msg = '电流泵校验失败(0~100)'
+        }
+        if (arr[8] > 100) {
+            flag = 8;
+            msg = '灵敏度校验失败(0~100)'
+        }
+        if (arr[9] > 100) {
+            flag = 9;
+            msg = '安全时间校验失败(0~100)'
+        }
+        if (arr[12]!==3 || arr[12]!==5 || arr[12]!==8) {
+            flag = 12;
+            msg = `定时为3 5 8不为${arr[12]}`;
+        }
+        return {
+            success: flag === -2,
+            errorIndex: flag,
+            errorArray: arr,
+            errorMsg: msg,
+        }
+    },
     //校验接收的数据
     isAcceptDataValid = (arr) => {
         if (arr[0] !== 0XEE) return false; //包头校验
@@ -256,6 +326,7 @@ const
         if (arr[7] > 100) return false;
         if (arr[8] > 100) return false;
         if (arr[9] > 100) return false;
+        if (arr[12]!==3 || arr[12]!==5 || arr[12]!==8) return false;
         return true
         // let flag = -2; //check位的flag定义为-1
         // if (arr[0] !== 0XEE) flag = 0; //包头校验
@@ -296,6 +367,10 @@ const
 //形式为 const v1 = ... ,v2 = ...,v3 = ..., ....
 
 module.exports = {
+    version,
+    isProduction,
+    version__trial,
+    version_develop,
     deviceConfig,
     getDeviceConfig,
     hideOtherDevices,

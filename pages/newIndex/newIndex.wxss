@@ -568,3 +568,14 @@
     width: 54rpx;
     height: 54rpx;
 }
+
+.ota__progress{
+    width: 80%;
+    margin: 0 auto;
+}
+.ota__progress__info{
+    color: rgba(36, 145, 251, 1);
+    font-size: 20rpx;
+    margin-top: 5rpx;
+    text-align: center;
+}

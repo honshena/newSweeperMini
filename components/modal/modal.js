@@ -1,7 +1,11 @@
 // components/modal/modal.js
 const sysInfo = wx.getSystemInfoSync()
-console.log(sysInfo)
 Component({
+    // observers: {
+    //     'isHidden': (value)=>{
+    //         console.log('111',value)
+    //     }
+    // },
     /**
      * 组件的属性列表
      */
@@ -10,7 +14,8 @@ Component({
             type: Boolean,
         },
         type: {
-            type: String
+            type: String,
+            value: 'input'
         },
         placeholder: {
             type: String
@@ -19,7 +24,7 @@ Component({
             type: Boolean
         },
         okText: {
-            type: String
+            type: null,
         },
         mask: {
             type: Boolean
@@ -28,7 +33,10 @@ Component({
             type: String
         },
         cancelText: {
-            type: String
+            type: null,
+        },
+        value : {
+            type: null,
         }
     },
 

@@ -4,7 +4,18 @@
     <view class="modal-wrapper">
         <view class="modal-info">提示</view>
         <view class="modal-area">
-            <input wx:if="{{type==='input'||type==='text'}}" bindblur='inputBlur' bindchange="chageInput" placeholder="{{isInput?'':placeholder}}" type="text" class="modal-input" maxlength="4" disabled="{{type==='text'}}" bindfocus="inputFocus"></input>
+            <input 
+                wx:if="{{type==='input'}}"
+                value="{{value}}"
+                bindblur='inputBlur' 
+                bindchange="chageInput" 
+                placeholder="{{isInput?'':placeholder}}" 
+                type="text"
+                class="modal-input" 
+                maxlength="4" 
+                disabled="{{type==='text'}}" 
+                bindfocus="inputFocus" />
+            <view wx:if="{{type==='text'}}" class="modal-text">{{placeholder}}</view>
             <slot></slot>
         </view>
         <view class="{{hideCancel?'modal-btn modal-btn-single':'modal-btn'}}">

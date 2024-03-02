@@ -56,6 +56,19 @@
     color: #000000;
     text-align: center;
 }
+.modal-text{
+    width: 459rpx;
+    box-sizing: border-box;
+    background-color: rgba(240, 246, 251, 1.000000);
+    border-radius: 12rpx;
+    padding: 10rpx;
+    font-size: 30rpx;
+    font-family: Source Han Sans CN;
+    font-weight: 400;
+    color: #000000;
+    text-align: center;
+    color: rgb(176, 177, 178);
+}
 .modal-btn{
     padding: 55rpx 32rpx 50rpx 32rpx;
     width: 100%;
