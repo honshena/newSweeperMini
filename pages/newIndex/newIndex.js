@@ -162,7 +162,7 @@ Page({
     },
 
     async onShow() {
-        const useTest = false
+        const useTest = false //|| true;
         //解包测试: 升级和通讯故障测试
         //this.resolvePackage([0, 1, 2, 3, 4, 2, 6, 7, 8, 9, 10, 11, 12])
         if (version === version_develop && useTest) {
@@ -393,6 +393,7 @@ Page({
     alreadyUpdate: false, //升级提示
     //todo 应该把提醒用户的放到一个函数里,只执行一次,之后解包不走这个函数
     resolvePackage(arr = []) {
+       // console.log('11111111111',arr)
         //解包的文档看document
         let ota = OTAVersion.get(LASTEST_VSERSION)
         if (ota.version > arr[1] && !this.alreadyUpdate) {
@@ -801,7 +802,10 @@ Page({
                 self.devicesMap.forEach(device => {
                     devices.push(device)
                 })
-                console.log("设备列表长度: ", devices.length, "设备列表: ", devices)
+                logDebugInfo({
+                    debug: true,
+                    info: ["设备列表长度: ", devices.length, "设备列表: ", devices]
+                })
                 self.setData({
                     devices,
                 })
@@ -928,7 +932,7 @@ Page({
             this.cheekSetting(inputInd, this.newInput[inputInd]);
         }
         this.newInput = input;
-        console.log('sendstr ', data)
+        // console.log('sendstr ', data)
         buletoothManaeger.writeBLECharacteristicValue(data)
     },
     //用户点击左转和右转
@@ -989,7 +993,7 @@ Page({
 
         data = parseInt(data)
 
-        console.log('handle input', data);
+        // console.log('handle input', data);
         buletoothManager.writeBLECharacteristicValue([prefix, data]);
         // 检查设置是否成功
         // inputInd是字符串不能使用 inputInd!==4
@@ -1066,6 +1070,7 @@ Page({
         if (errFlag)
             return
         this.newInput = input;
+        // console.log('change Input', this.newInput,input[inputInd],value)
         this.setData({
             input,
         });

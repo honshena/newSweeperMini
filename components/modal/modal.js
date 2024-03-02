@@ -1,4 +1,7 @@
 // components/modal/modal.js
+const {
+    logDebugInfo
+} = require('../../utils/log')
 const sysInfo = wx.getSystemInfoSync()
 Component({
     // observers: {
@@ -18,7 +21,7 @@ Component({
             value: 'input'
         },
         placeholder: {
-            type: String
+            type: null,
         },
         hideCancel: {
             type: Boolean
@@ -35,7 +38,7 @@ Component({
         cancelText: {
             type: null,
         },
-        value : {
+        value: {
             type: null,
         }
     },
@@ -52,13 +55,26 @@ Component({
     inputValue: '',
     //防止多次点击
     isHandleSure: false,
+    observers: {
+        'value': function (value) {
+            this.inputValue = value;
+            logDebugInfo({
+                debug: true,
+                info: `[modal弹窗.observers.value]: 显示弹窗, 赋值inputValue[${this.inputValue}]`
+            })
+        },
+    },
     /**
      * 组件的方法列表
      */
     methods: {
         chageInput(e) {
             let value = e.detail.value || ''
-            this.inputValue = value
+            this.inputValue = value;
+            logDebugInfo({
+                debug: true,
+                info: `[modal弹窗.chageInput]: 修改输入框值为[${this.inputValue}]`
+            })
         },
         inputFocus() {
             this.setData({
@@ -78,6 +94,10 @@ Component({
             if (this.isHandleSure) return;
             this.isHandleSure = true
             try {
+                logDebugInfo({
+                    debug: true,
+                    info: `[modal弹窗.handleSure]: 点击确定提交值[${this.inputValue}]`
+                })
                 await this.triggerEvent('handleSure', this.inputValue)
             } catch (e) {}
             this.isHandleSure = false

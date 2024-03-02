@@ -8,7 +8,7 @@
                 wx:if="{{type==='input'}}"
                 value="{{value}}"
                 bindblur='inputBlur' 
-                bindchange="chageInput" 
+                bindinput="chageInput" 
                 placeholder="{{isInput?'':placeholder}}" 
                 type="text"
                 class="modal-input" 
