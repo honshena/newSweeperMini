@@ -1,0 +1,8 @@
+var convertToCurrent = function (num) {
+    return (parseInt(num) / 10).toFixed(1);
+}
+var mul10 = function (num) {
+    return parseInt(num) * 10;
+}
+module.exports.convertToCurrent = convertToCurrent // 将传入的数字转为电流 
+module.exports.mul10 = mul10; // 将传入的数字乘10
